@@ -1,26 +1,162 @@
 @import "tailwindcss";
 
+/* ─────────────────────────────────────────────
+   MEMORIQ Design System — CSS Custom Properties
+   Source of truth: docs/02-design-system.md
+   Never hardcode hex values in components.
+   ───────────────────────────────────────────── */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Canvas */
+  --color-ink: #0E0E10;
+  --color-ink-soft: #1A1613;
+  --color-bone: #F4F1EA;
+  --color-bone-warm: #EAE4D6;
+
+  /* Accent */
+  --color-clay: #C65D3F;
+  --color-clay-soft: rgba(198, 93, 63, 0.08);
+
+  /* Neutrals */
+  --color-warm-gray: #8A7B68;
+  --color-warm-gray-soft: #5A4F42;
+
+  /* Borders */
+  --color-border-dark: rgba(244, 241, 234, 0.12);
+  --color-border-dark-strong: rgba(244, 241, 234, 0.3);
+  --color-border-light: rgba(26, 22, 19, 0.18);
+  --color-border-light-soft: rgba(26, 22, 19, 0.12);
+
+  /* Typography */
+  --font-sans: 'Inter', 'DM Sans', -apple-system, system-ui, sans-serif;
+
+  /* Type scale */
+  --text-display: clamp(44px, 7vw, 72px);
+  --text-display-weight: 500;
+  --text-display-tracking: -0.035em;
+  --text-display-leading: 0.98;
+
+  --text-section: clamp(36px, 5vw, 54px);
+  --text-section-weight: 500;
+  --text-section-tracking: -0.035em;
+  --text-section-leading: 1;
+
+  --text-sub: clamp(20px, 2.2vw, 26px);
+  --text-sub-weight: 500;
+  --text-sub-tracking: -0.02em;
+  --text-sub-leading: 1.2;
+
+  --text-label: 11px;
+  --text-label-weight: 500;
+  --text-label-tracking: 0.18em;
+
+  --text-micro-label: 10px;
+  --text-micro-label-tracking: 0.2em;
+
+  --text-body: 15px;
+  --text-body-leading: 1.55;
+
+  --text-small: 13px;
+  --text-small-leading: 1.6;
+
+  --text-tiny: 12px;
+  --text-tiny-tracking: 0.02em;
+
+  /* Spacing scale */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --space-4xl: 96px;
+  --space-5xl: 120px;
 }
+
+/* ─────────────────────────────────────────────
+   Tailwind v4 Theme — maps CSS vars to utilities
+   bg-ink, text-clay, border-border-dark, etc.
+   ───────────────────────────────────────────── */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Colors */
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-bone: var(--color-bone);
+  --color-bone-warm: var(--color-bone-warm);
+  --color-clay: var(--color-clay);
+  --color-clay-soft: var(--color-clay-soft);
+  --color-warm-gray: var(--color-warm-gray);
+  --color-warm-gray-soft: var(--color-warm-gray-soft);
+  --color-border-dark: var(--color-border-dark);
+  --color-border-dark-strong: var(--color-border-dark-strong);
+  --color-border-light: var(--color-border-light);
+  --color-border-light-soft: var(--color-border-light-soft);
+
+  /* Font family */
+  --font-sans: var(--font-inter), 'DM Sans', -apple-system, system-ui, sans-serif;
+
+  /* Spacing */
+  --spacing-xs: var(--space-xs);
+  --spacing-sm: var(--space-sm);
+  --spacing-md: var(--space-md);
+  --spacing-lg: var(--space-lg);
+  --spacing-xl: var(--space-xl);
+  --spacing-2xl: var(--space-2xl);
+  --spacing-3xl: var(--space-3xl);
+  --spacing-4xl: var(--space-4xl);
+  --spacing-5xl: var(--space-5xl);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─────────────────────────────────────────────
+   Base styles
+   ───────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-ink);
+  color: var(--color-bone);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--text-body-leading);
+  min-height: 100vh;
+}
+
+/* Never justify text — always left-align */
+p,
+li,
+blockquote {
+  text-align: left;
+  max-width: 60ch;
+}
+
+/* Remove default margin on headings */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: var(--text-display-weight);
+}
+
+/* Images */
+img,
+video {
+  max-width: 100%;
+  display: block;
+}
+
+/* Transitions — restrained, per design system */
+a,
+button {
+  transition: all 150ms ease;
 }
