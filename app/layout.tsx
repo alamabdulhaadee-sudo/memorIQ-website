@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Nav } from "@/components/layout/Nav";
+import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
 
 const inter = Inter({
@@ -30,7 +32,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} h-full`}>
-      <body className="min-h-full flex flex-col antialiased">{children}</body>
+      <body className="min-h-full flex flex-col antialiased">
+        <Nav />
+        {/*
+          pt-[60px] on mobile / pt-[68px] on sm+ matches the nav height
+          so page content is never hidden behind the sticky header.
+          Hero sections that want to bleed behind the nav should apply
+          negative margin-top instead of relying on this padding.
+        */}
+        <div className="flex flex-col flex-1 pt-[60px] sm:pt-[68px]">
+          {children}
+        </div>
+        <Footer />
+      </body>
     </html>
   );
 }
