@@ -1,12 +1,8 @@
 'use client';
 
-// TODO: If the final design calls for suppressing the site Nav/Footer on /book/*
-// routes, that change must happen in app/layout.tsx (e.g. by reading the pathname
-// there and conditionally rendering Nav/Footer). This nested layout does NOT
-// duplicate Nav/Footer — it only adds the step indicator bar and BookingProvider.
-
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { BookingProvider } from '@/contexts/BookingContext';
+import { useBooking } from '@/contexts/BookingContext';
 
 // ── Step metadata ─────────────────────────────────────────────
 
@@ -103,22 +99,48 @@ function StepIndicator() {
 
 
 // ── Close button ──────────────────────────────────────────────
-// TODO: Replace with a confirm dialog ("Are you sure? Your progress will be lost.")
-// when any booking step has been completed. For now it links directly to homepage.
+
+function hasProgress(state: ReturnType<typeof useBooking>['state']): boolean {
+  return (
+    state.eventDate !== null ||
+    state.packageId !== 'signature' ||
+    state.customerName.trim() !== '' ||
+    state.customerEmail.trim() !== '' ||
+    state.customerPhone.trim() !== '' ||
+    state.venueAddress.trim() !== ''
+  );
+}
 
 function CloseButton() {
+  const router = useRouter();
+  const { state } = useBooking();
+
+  function handleClose() {
+    if (!hasProgress(state)) {
+      router.push('/');
+      return;
+    }
+
+    const confirmed = window.confirm("Leave booking? Your progress won't be saved.");
+    if (confirmed) {
+      try { sessionStorage.removeItem('memoriq-booking'); } catch { /* unavailable */ }
+      router.push('/');
+    }
+  }
+
   return (
-    <a
-      href="/"
+    <button
+      type="button"
+      onClick={handleClose}
       className={[
         'flex-shrink-0 text-[12px] font-medium text-warm-gray hover:text-ink-soft',
-        'transition-colors duration-150 leading-none',
+        'transition-colors duration-150 leading-none bg-transparent border-0 cursor-pointer p-0',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay/50 rounded',
       ].join(' ')}
       aria-label="Close booking and return to homepage"
     >
       Close&nbsp;×
-    </a>
+    </button>
   );
 }
 

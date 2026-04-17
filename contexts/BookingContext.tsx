@@ -3,6 +3,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useReducer,
   type ReactNode,
 } from 'react';
@@ -84,10 +85,38 @@ interface BookingContextValue {
 const BookingContext = createContext<BookingContextValue | null>(null);
 
 
+const SESSION_KEY = 'memoriq-booking';
+
+function loadInitialState(): BookingState {
+  if (typeof window === 'undefined') return initialState;
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as BookingState;
+      // Basic sanity: make sure it has the shape we expect
+      if (typeof parsed === 'object' && parsed !== null) return { ...initialState, ...parsed };
+    }
+  } catch {
+    // Corrupt or unavailable — fall through to initialState
+  }
+  return initialState;
+}
+
+
 // ── Provider ──────────────────────────────────────────────────
 
 export function BookingProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(bookingReducer, initialState);
+  const [state, dispatch] = useReducer(bookingReducer, undefined, loadInitialState);
+
+  // Persist to sessionStorage on every state change (SSR-safe)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(state));
+    } catch {
+      // sessionStorage unavailable — silent fail
+    }
+  }, [state]);
 
   return (
     <BookingContext.Provider value={{ state, dispatch }}>

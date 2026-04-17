@@ -215,12 +215,17 @@ export default function PayPageClient() {
   const [intentError,  setIntentError]  = useState<string | null>(null);
   const [fetching,     setFetching]     = useState(false);
 
-  // Guard: redirect if earlier steps were skipped
+  // Guard: redirect to the first incomplete step
   useEffect(() => {
-    if (!state.eventDate || !state.packageId) {
+    if (!state.eventDate) {
       router.replace('/book/date');
+    } else if (!state.packageId) {
+      router.replace('/book/package');
+    } else if (!state.customerName.trim() || !state.customerEmail.trim() || !state.venueAddress.trim()) {
+      router.replace('/book/details');
     }
-  }, [state.eventDate, state.packageId, router]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchIntent = useCallback(async () => {
     setFetching(true);

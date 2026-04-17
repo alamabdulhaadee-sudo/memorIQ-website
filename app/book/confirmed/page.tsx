@@ -128,6 +128,8 @@ export default function ConfirmedPage() {
   useEffect(() => {
     // Context already has data (in-flow navigation, no redirect)
     if (state.eventDate) {
+      // Clear sessionStorage — booking is complete
+      try { sessionStorage.removeItem('memoriq-booking'); } catch { /* unavailable */ }
       setRestored(state);
       return;
     }

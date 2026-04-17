@@ -21,6 +21,18 @@ export default function CustomizePage() {
   const router = useRouter();
   const { state, dispatch } = useBooking();
 
+  // ── Guard: redirect if earlier steps were skipped ─────────────
+  useEffect(() => {
+    if (!state.eventDate) {
+      router.replace('/book/date');
+    } else if (!state.packageId) {
+      router.replace('/book/package');
+    } else if (!state.customerName.trim() || !state.customerEmail.trim()) {
+      router.replace('/book/details');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ── Apply defaults on mount (only if not already set — preserves
   //    back-navigation selections) ─────────────────────────────────
   useEffect(() => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useBooking } from '@/contexts/BookingContext';
@@ -9,8 +9,15 @@ import { Button } from '@/components/ui/Button';
 
 export default function DetailsPage() {
   const router = useRouter();
-  // Validates we're inside BookingProvider — throws if not
-  useBooking();
+  const { state } = useBooking();
+
+  useEffect(() => {
+    if (!state.eventDate) {
+      router.replace('/book/date');
+    } else if (!state.packageId) {
+      router.replace('/book/package');
+    }
+  }, [state.eventDate, state.packageId, router]);
 
   const [isFormValid, setIsFormValid] = useState(false);
 

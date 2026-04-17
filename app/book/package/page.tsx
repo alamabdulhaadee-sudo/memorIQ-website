@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useBooking } from '@/contexts/BookingContext';
@@ -11,6 +12,12 @@ import type { PackageId } from '@/types/booking';
 export default function PackagePage() {
   const router = useRouter();
   const { state, dispatch } = useBooking();
+
+  useEffect(() => {
+    if (!state.eventDate) {
+      router.replace('/book/date');
+    }
+  }, [state.eventDate, router]);
 
   function handleSelect(id: PackageId) {
     dispatch({ type: 'SET_PACKAGE_ID', payload: id });
