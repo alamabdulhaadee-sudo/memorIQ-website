@@ -1,59 +1,148 @@
-import type { Metadata } from 'next';
-import { Button } from '@/components/ui/Button';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Choose Package | Book MEMORIQ',
-};
+import { useRouter } from 'next/navigation';
+
+import { useBooking } from '@/contexts/BookingContext';
+import { PackageCard } from '@/components/ui/PackageCard';
+import { Button } from '@/components/ui/Button';
+import { PACKAGES } from '@/lib/data/packages';
+import type { PackageId } from '@/types/booking';
 
 export default function PackagePage() {
-  return (
-    <div className="min-h-[calc(100vh-60px)] sm:min-h-[calc(100vh-68px)] flex flex-col">
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[2fr_3fr] max-w-[1200px] mx-auto w-full px-md sm:px-lg lg:px-xl py-[56px] lg:py-[80px] gap-[48px] lg:gap-[80px]">
+  const router = useRouter();
+  const { state, dispatch } = useBooking();
 
-        {/* Left column — context */}
+  function handleSelect(id: PackageId) {
+    dispatch({ type: 'SET_PACKAGE_ID', payload: id });
+  }
+
+  function handleBack() {
+    router.push('/book/date');
+  }
+
+  function handleContinue() {
+    router.push('/book/details');
+  }
+
+  return (
+    <div
+      style={{
+        minHeight: 'calc(100vh - 60px)',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <div
+        className="grid grid-cols-1 lg:grid-cols-[2fr_3fr] items-start"
+        style={{
+          flex: 1,
+          maxWidth: '1200px',
+          margin: '0 auto',
+          width: '100%',
+          padding: 'clamp(40px, 5vw, 80px) clamp(20px, 4vw, 48px)',
+          gap: 'clamp(40px, 6vw, 80px)',
+        }}
+      >
+        {/* ── Left column — context ─────────────────────────────── */}
         <div>
-          <p className="text-[11px] font-medium tracking-[0.18em] uppercase text-warm-gray mb-[20px]">
-            02&nbsp;/&nbsp;PACKAGE
+          {/* Step label */}
+          <p
+            style={{
+              fontSize: '10px',
+              fontWeight: 500,
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              color: 'var(--color-warm-gray)',
+              marginBottom: '20px',
+            }}
+          >
+            Step 02 / 05
           </p>
+
+          {/* Headline */}
           <h1
-            className="text-[clamp(32px,4vw,48px)] font-medium tracking-[-0.035em] leading-[1] text-ink-soft mb-[16px]"
+            style={{
+              fontSize: 'clamp(32px, 4vw, 44px)',
+              fontWeight: 500,
+              letterSpacing: '-0.035em',
+              lineHeight: 1,
+              color: 'var(--color-ink-soft)',
+              marginBottom: '16px',
+            }}
           >
             Which package fits the night?
           </h1>
-          <p className="text-[14px] text-warm-gray-soft leading-[1.6] max-w-[38ch]">
-            Most events book Signature. Start there unless you&rsquo;ve got a specific
-            reason to go smaller or bigger.
-          </p>
 
+          {/* Sub-copy */}
+          <p
+            style={{
+              fontSize: '14px',
+              color: 'var(--color-warm-gray-soft)',
+              lineHeight: 1.6,
+              maxWidth: '360px',
+            }}
+          >
+            Most events book Signature. Start there unless you&rsquo;ve got a
+            specific reason to go smaller or bigger.
+          </p>
+        </div>
+
+        {/* ── Right column — package cards ──────────────────────── */}
+        <div role="radiogroup" aria-label="Select a package">
+          {/* Cards — stacked vertically in the 60% column */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {PACKAGES.map((pkg) => (
+              <PackageCard
+                key={pkg.id}
+                mode="booking"
+                pkg={pkg}
+                selected={state.packageId === pkg.id}
+                onSelect={() => handleSelect(pkg.id)}
+              />
+            ))}
+          </div>
+
+          {/* "Not sure?" link */}
           <a
             href="/contact"
-            className="mt-[24px] inline-block text-[13px] text-clay hover:underline transition-colors duration-150"
+            style={{
+              display: 'inline-block',
+              marginTop: '20px',
+              fontSize: '13px',
+              color: 'var(--color-warm-gray)',
+              textDecoration: 'none',
+              transition: 'color 150ms ease',
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLAnchorElement).style.color =
+                'var(--color-ink-soft)')
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLAnchorElement).style.color =
+                'var(--color-warm-gray)')
+            }
           >
             Not sure? Contact us for a quick consult →
           </a>
-        </div>
 
-        {/* Right column — placeholder */}
-        <div className="flex flex-col gap-[32px]">
+          {/* Navigation */}
           <div
-            className="flex-1 min-h-[360px] rounded-[4px] bg-bone-warm flex items-center justify-center"
-            style={{ border: '0.5px solid var(--color-border-light)' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: '32px',
+            }}
           >
-            <p className="text-[11px] font-medium tracking-[0.18em] uppercase text-warm-gray opacity-60">
-              [Package cards — built in Prompt 3]
-            </p>
-          </div>
-
-          <div className="flex items-center justify-between gap-[12px]">
-            <Button variant="secondary" surface="light" href="/book/date">
+            <Button variant="secondary" surface="light" onClick={handleBack}>
               ← Back
             </Button>
-            <Button variant="primary" href="#" aria-disabled="true">
+            {/* Always enabled — Signature is pre-selected by default */}
+            <Button variant="primary" onClick={handleContinue}>
               Continue →
             </Button>
           </div>
         </div>
-
       </div>
     </div>
   );

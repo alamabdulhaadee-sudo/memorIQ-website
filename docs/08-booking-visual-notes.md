@@ -48,9 +48,18 @@ These notes supplement docs/05-booking-flow.md with specific visual decisions fr
 ### Right column: Package cards
 - Three cards identical to homepage Pricing section cards
 - Radio-style selection: clicking a card selects it
-- Selected card: 2px clay border
+- Selected card: 2px clay border on all four sides (overrides the seam-collapsing border logic used on the homepage)
 - Signature card pre-selected by default
 - "Not sure? Contact us for a quick consult →" link below cards
+
+### Card layout in the right column
+- Cards stack **vertically** (single column), not in a 3-column grid.
+- Rationale: the right column is ~60% viewport width. A 3-column mini-grid at that width produces cramped cards. Stacked full-width cards are more readable and thumb-friendly on mobile.
+- This differs from the homepage Pricing section, which uses a 3-column grid at full container width.
+
+### Component reuse
+- `PackageCard` (`components/ui/PackageCard.tsx`) is the shared component used by both the homepage and this step.
+- Pass `mode="booking"` here; `mode="homepage"` on the homepage. The `position` prop (seam collapsing) only applies in homepage mode.
 
 ---
 
