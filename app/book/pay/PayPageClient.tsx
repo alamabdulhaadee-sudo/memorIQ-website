@@ -60,9 +60,10 @@ const stripeAppearance = {
 
 interface PaymentFormProps {
   clientSecret: string;
+  bookingState: ReturnType<typeof useBooking>['state'];
 }
 
-function PaymentForm({ clientSecret }: PaymentFormProps) {
+function PaymentForm({ clientSecret: _clientSecret, bookingState }: PaymentFormProps) {
   const stripe   = useStripe();
   const elements = useElements();
 
@@ -85,6 +86,13 @@ function PaymentForm({ clientSecret }: PaymentFormProps) {
 
     const origin =
       typeof window !== 'undefined' ? window.location.origin : '';
+
+    // Persist state before Stripe navigates away — context is lost on redirect
+    try {
+      sessionStorage.setItem('memoriq-booking', JSON.stringify(bookingState));
+    } catch {
+      // sessionStorage unavailable — confirmed page will handle gracefully
+    }
 
     const { error } = await stripe.confirmPayment({
       elements,
@@ -446,7 +454,7 @@ export default function PayPageClient() {
               stripe={stripePromise}
               options={{ clientSecret, appearance: stripeAppearance }}
             >
-              <PaymentForm clientSecret={clientSecret} />
+              <PaymentForm clientSecret={clientSecret} bookingState={state} />
             </Elements>
           )}
 
