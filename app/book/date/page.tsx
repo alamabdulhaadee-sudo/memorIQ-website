@@ -1,79 +1,297 @@
-import type { Metadata } from 'next';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+import { useBooking } from '@/contexts/BookingContext';
+import { Calendar } from '@/components/booking/Calendar';
 import { Button } from '@/components/ui/Button';
+import {
+  getMonthAvailability,
+  type MonthAvailability,
+} from '@/lib/mock/availability';
 
-export const metadata: Metadata = {
-  title: 'Select Date | Book MEMORIQ',
-};
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
-export default function DatePage() {
+function parseISOMonth(isoDate: string): { year: number; month: number } {
+  const [y, m] = isoDate.split('-').map(Number);
+  return { year: y, month: m - 1 };
+}
+
+function formatDisplayDate(isoDate: string): string {
+  const [y, m, d] = isoDate.split('-').map(Number);
+  const date    = new Date(y, m - 1, d);
+  const weekday = date.toLocaleDateString('en-CA', { weekday: 'long' });
+  const month   = date.toLocaleDateString('en-CA', { month: 'long' });
+  return `${weekday}, ${month} ${d} · ${y}`;
+}
+
+// Diagonal stripe pattern — matches Calendar.tsx limited cell
+const STRIPE_BG =
+  'repeating-linear-gradient(135deg, rgba(244,241,234,0.15) 0px, rgba(244,241,234,0.15) 1px, transparent 1px, transparent 6px)';
+
+// ---------------------------------------------------------------------------
+// Legend
+// ---------------------------------------------------------------------------
+
+function Legend() {
+  const items = [
+    {
+      label: 'Available — book instantly',
+      style: { background: 'var(--color-clay)', borderRadius: '2px' } as React.CSSProperties,
+    },
+    {
+      label: 'Limited — daytime only',
+      style: {
+        background: `${STRIPE_BG}, var(--color-ink)`,
+        borderRadius: '2px',
+      } as React.CSSProperties,
+    },
+    {
+      label: 'Booked — try a nearby date',
+      style: {
+        background: 'rgba(26,22,19,0.12)',
+        borderRadius: '2px',
+      } as React.CSSProperties,
+    },
+  ];
+
   return (
-    <div className="min-h-[calc(100vh-60px)] sm:min-h-[calc(100vh-68px)] flex flex-col">
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[2fr_3fr] max-w-[1200px] mx-auto w-full px-md sm:px-lg lg:px-xl py-[56px] lg:py-[80px] gap-[48px] lg:gap-[80px]">
-
-        {/* Left column — context */}
-        <div>
-          <p className="text-[11px] font-medium tracking-[0.18em] uppercase text-warm-gray mb-[20px]">
-            01&nbsp;/&nbsp;DATE
-          </p>
-          <h1
-            className="text-[clamp(32px,4vw,48px)] font-medium tracking-[-0.035em] leading-[1] text-ink-soft mb-[16px]"
-          >
-            When&rsquo;s the big day?
-          </h1>
-          <p className="text-[14px] text-warm-gray-soft leading-[1.6] max-w-[38ch]">
-            Pick your event date. We&rsquo;ll hold it for 15 minutes while you finish
-            booking. Dates in orange are available, grey is taken.
-          </p>
-
-          {/* Helper callout */}
-          <div
-            className="mt-[32px] p-[16px] rounded-[4px]"
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+        marginTop: '32px',
+      }}
+    >
+      {items.map(({ label, style }) => (
+        <div
+          key={label}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+        >
+          <div style={{ width: '14px', height: '14px', flexShrink: 0, ...style }} />
+          <span
             style={{
-              background: 'var(--color-clay-soft)',
-              borderLeft: '3px solid var(--color-clay)',
+              fontSize: '13px',
+              color: 'var(--color-warm-gray-soft)',
             }}
           >
-            <p className="text-[13px] text-ink-soft leading-[1.5]">
-              <strong>Heads up.</strong> June through October books 6–8 weeks out.
-              If your date&rsquo;s open, don&rsquo;t sleep on it.
-            </p>
-          </div>
+            {label}
+          </span>
         </div>
-
-        {/* Right column — placeholder */}
-        <div className="flex flex-col gap-[32px]">
-          <div
-            className="flex-1 min-h-[360px] rounded-[4px] bg-bone-warm flex items-center justify-center"
-            style={{ border: '0.5px solid var(--color-border-light)' }}
-          >
-            <p className="text-[11px] font-medium tracking-[0.18em] uppercase text-warm-gray opacity-60">
-              [Calendar — built in Prompt 2]
-            </p>
-          </div>
-
-          {/* Navigation */}
-          <StepNav showBack={false} />
-        </div>
-
-      </div>
+      ))}
     </div>
   );
 }
 
-// Shared nav used across all stubs (inlined to avoid a client component)
-function StepNav({ showBack }: { showBack: boolean }) {
+// ---------------------------------------------------------------------------
+// Selection confirmation bar
+// ---------------------------------------------------------------------------
+
+function ConfirmationBar({
+  isoDate,
+  onContinue,
+}: {
+  isoDate: string;
+  onContinue: () => void;
+}) {
   return (
-    <div className="flex items-center justify-between gap-[12px]">
-      {showBack ? (
-        <Button variant="secondary" surface="light" href="#" aria-disabled="true">
-          ← Back
-        </Button>
-      ) : (
-        <span />
-      )}
-      <Button variant="primary" href="#" aria-disabled="true">
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        background: 'var(--color-ink)',
+        color: 'var(--color-bone)',
+        borderRadius: '4px',
+        padding: '16px 20px',
+        marginTop: '16px',
+        gap: '16px',
+      }}
+    >
+      <div>
+        <p
+          style={{
+            fontSize: '11px',
+            fontWeight: 500,
+            letterSpacing: '0.15em',
+            color: 'rgba(244,241,234,0.5)',
+            marginBottom: '4px',
+            textTransform: 'uppercase',
+          }}
+        >
+          Selected
+        </p>
+        <p
+          style={{
+            fontSize: '15px',
+            fontWeight: 500,
+            color: 'var(--color-bone)',
+          }}
+        >
+          {formatDisplayDate(isoDate)}
+        </p>
+      </div>
+
+      <Button variant="primary" onClick={onContinue}>
         Continue →
       </Button>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Page
+// ---------------------------------------------------------------------------
+
+export default function DatePage() {
+  const router = useRouter();
+  const { state, dispatch } = useBooking();
+
+  // Determine initial month: use pre-selected date from context (back-nav),
+  // or default to today's month.
+  function getInitialMonth(): { year: number; month: number } {
+    if (state.eventDate) return parseISOMonth(state.eventDate);
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth() };
+  }
+
+  const [displayYear,  setDisplayYear]  = useState(() => getInitialMonth().year);
+  const [displayMonth, setDisplayMonth] = useState(() => getInitialMonth().month);
+  const [availability, setAvailability] = useState<MonthAvailability>(() =>
+    getMonthAvailability(getInitialMonth().year, getInitialMonth().month),
+  );
+
+  // Re-fetch availability when displayed month changes
+  useEffect(() => {
+    setAvailability(getMonthAvailability(displayYear, displayMonth));
+  }, [displayYear, displayMonth]);
+
+  function handleMonthChange(year: number, month: number) {
+    setDisplayYear(year);
+    setDisplayMonth(month);
+  }
+
+  function handleDateSelect(isoDate: string) {
+    dispatch({ type: 'SET_EVENT_DATE', payload: isoDate });
+  }
+
+  function handleContinue() {
+    router.push('/book/package');
+  }
+
+  return (
+    <div
+      style={{
+        minHeight: 'calc(100vh - 60px)',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <div
+        className="grid grid-cols-1 lg:grid-cols-[2fr_3fr] items-start"
+        style={{
+          flex: 1,
+          maxWidth: '1200px',
+          margin: '0 auto',
+          width: '100%',
+          padding: 'clamp(40px, 5vw, 80px) clamp(20px, 4vw, 48px)',
+          gap: 'clamp(40px, 6vw, 80px)',
+        }}
+      >
+        {/* ── Left column — context ─────────────────────────────── */}
+        <div>
+          {/* Step label */}
+          <p
+            style={{
+              fontSize: '10px',
+              fontWeight: 500,
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              color: 'var(--color-warm-gray)',
+              marginBottom: '20px',
+            }}
+          >
+            Step 01 / 05
+          </p>
+
+          {/* Headline */}
+          <h1
+            style={{
+              fontSize: 'clamp(32px, 4vw, 44px)',
+              fontWeight: 500,
+              letterSpacing: '-0.035em',
+              lineHeight: 1,
+              color: 'var(--color-ink-soft)',
+              marginBottom: '16px',
+            }}
+          >
+            When&rsquo;s the big day?
+          </h1>
+
+          {/* Sub-copy */}
+          <p
+            style={{
+              fontSize: '14px',
+              color: 'var(--color-warm-gray-soft)',
+              lineHeight: 1.6,
+              maxWidth: '360px',
+            }}
+          >
+            Pick your event date. We&rsquo;ll hold it for 15 minutes while you
+            finish booking. Dates in orange are available, grey is taken.
+          </p>
+
+          {/* Legend */}
+          <Legend />
+
+          {/* Callout box */}
+          <div
+            style={{
+              marginTop: '32px',
+              padding: '16px 20px',
+              background: 'var(--color-clay-soft)',
+              borderLeft: '2px solid var(--color-clay)',
+              borderRadius: '0 4px 4px 0',
+            }}
+          >
+            <p
+              style={{
+                fontSize: '14px',
+                color: 'var(--color-warm-gray-soft)',
+                lineHeight: 1.5,
+              }}
+            >
+              <strong style={{ color: 'var(--color-ink-soft)' }}>Heads up.</strong>{' '}
+              June through October books 6–8 weeks out. If your date&rsquo;s open,
+              don&rsquo;t sleep on it.
+            </p>
+          </div>
+        </div>
+
+        {/* ── Right column — calendar ───────────────────────────── */}
+        <div>
+          <Calendar
+            year={displayYear}
+            month={displayMonth}
+            availability={availability}
+            selectedDate={state.eventDate}
+            onDateSelect={handleDateSelect}
+            onMonthChange={handleMonthChange}
+          />
+
+          {/* Confirmation bar — slides in when a date is selected */}
+          {state.eventDate && (
+            <ConfirmationBar
+              isoDate={state.eventDate}
+              onContinue={handleContinue}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 }
