@@ -2,6 +2,11 @@ import { Hero } from "@/components/home/Hero";
 import { ExperiencePreview } from "@/components/home/ExperiencePreview";
 import { ServicesBands } from "@/components/home/ServicesBands";
 import { HowItWorks } from "@/components/home/HowItWorks";
+import { GalleryGrid } from "@/components/home/GalleryGrid";
+import { Pricing } from "@/components/home/Pricing";
+import { Testimonials } from "@/components/home/Testimonials";
+import { FAQ } from "@/components/home/FAQ";
+import { ClosingCTA } from "@/components/home/ClosingCTA";
 
 export default function HomePage() {
   return (
@@ -10,7 +15,11 @@ export default function HomePage() {
       <ExperiencePreview />
       <ServicesBands />
       <HowItWorks />
-      {/* Phase 2 sections will follow */}
+      <GalleryGrid />
+      <Pricing />
+      <Testimonials />
+      <FAQ />
+      <ClosingCTA />
     </main>
   );
 }

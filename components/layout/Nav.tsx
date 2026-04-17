@@ -130,6 +130,7 @@ export function Nav() {
       {/* Mobile full-screen overlay menu */}
       <div
         aria-hidden={!menuOpen}
+        inert={!menuOpen}
         className={[
           "fixed inset-0 z-40 bg-ink flex flex-col px-md pt-[80px] pb-[48px]",
           "transition-opacity duration-200 ease-[ease]",

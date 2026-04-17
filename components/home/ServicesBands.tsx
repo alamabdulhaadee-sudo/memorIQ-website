@@ -74,7 +74,7 @@ function BandRow({ band }: { band: Band }) {
 
           {/* Column 2 — Content */}
           <div>
-            <p
+            <h3
               className="font-medium text-ink-soft"
               style={{
                 fontSize: "var(--text-sub)",
@@ -83,7 +83,7 @@ function BandRow({ band }: { band: Band }) {
               }}
             >
               {band.subHeadline}
-            </p>
+            </h3>
             <p
               className="text-warm-gray-soft mt-[16px]"
               style={{
@@ -110,15 +110,7 @@ function BandRow({ band }: { band: Band }) {
             </p>
             <a
               href={band.link}
-              className="text-[13px] text-warm-gray leading-none lg:mt-[12px]"
-              style={{ transition: "color 150ms ease" }}
-              onMouseEnter={(e) =>
-                ((e.currentTarget as HTMLAnchorElement).style.color =
-                  "var(--color-ink-soft)")
-              }
-              onMouseLeave={(e) =>
-                ((e.currentTarget as HTMLAnchorElement).style.color = "")
-              }
+              className="text-[13px] text-warm-gray leading-none lg:mt-[12px] transition-colors duration-150 hover:text-ink-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay/50 focus-visible:ring-offset-2 rounded-[2px]"
             >
               {band.linkLabel}
             </a>
@@ -131,7 +123,7 @@ function BandRow({ band }: { band: Band }) {
 
 export function ServicesBands() {
   return (
-    <section>
+    <section className="bg-bone">
       {/* Section header */}
       <Container className="pt-[56px] sm:pt-[80px] lg:pt-[96px] pb-[48px]">
         <SectionLabel index="02" label="Who we build for" surface="light" />

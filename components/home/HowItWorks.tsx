@@ -43,17 +43,9 @@ function StepCard({ step, index }: { step: Step; index: number }) {
         index === 1
           ? "lg:px-[40px] lg:[border-right:0.5px_solid_var(--color-border-light)]"
           : "",
-        index === STEPS.length - 1 - 1
-          ? "lg:[border-right:0.5px_solid_var(--color-border-light)]"
-          : "",
         index === 2 ? "lg:pl-[40px]" : "",
         "lg:pt-[40px] lg:pb-[48px]",
       ].join(" ")}
-      style={
-        index < STEPS.length - 1
-          ? { borderRight: undefined }
-          : undefined
-      }
     >
       {/* Numeral */}
       <span

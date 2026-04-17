@@ -18,7 +18,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const baseStyles =
-  "inline-flex items-center justify-center rounded-full text-[13px] font-medium leading-none tracking-[0.01em] cursor-pointer select-none transition-all duration-150 ease-[ease] whitespace-nowrap disabled:opacity-40 disabled:pointer-events-none";
+  "inline-flex items-center justify-center rounded-full text-[13px] font-medium leading-none tracking-[0.01em] cursor-pointer select-none transition-all duration-150 ease-[ease] whitespace-nowrap disabled:opacity-40 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay/50 focus-visible:ring-offset-2";
 
 const variantStyles: Record<ButtonVariant, Record<ButtonSurface, string>> = {
   primary: {
