@@ -21,6 +21,9 @@
   --color-warm-gray: #8A7B68;
   --color-warm-gray-soft: #5A4F42;
 
+  /* Feedback */
+  --color-error: #c0392b;
+
   /* Borders */
   --color-border-dark: rgba(244, 241, 234, 0.12);
   --color-border-dark-strong: rgba(244, 241, 234, 0.3);

@@ -1,51 +1,109 @@
-import type { Metadata } from 'next';
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+import { useBooking } from '@/contexts/BookingContext';
+import { DetailsForm } from '@/components/booking/DetailsForm';
 import { Button } from '@/components/ui/Button';
 
-export const metadata: Metadata = {
-  title: 'Event Details | Book MEMORIQ',
-};
-
 export default function DetailsPage() {
-  return (
-    <div className="min-h-[calc(100vh-60px)] sm:min-h-[calc(100vh-68px)] flex flex-col">
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[2fr_3fr] max-w-[1200px] mx-auto w-full px-md sm:px-lg lg:px-xl py-[56px] lg:py-[80px] gap-[48px] lg:gap-[80px]">
+  const router = useRouter();
+  // Validates we're inside BookingProvider — throws if not
+  useBooking();
 
-        {/* Left column — context */}
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  return (
+    <div
+      style={{
+        minHeight: 'calc(100vh - 60px)',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <div
+        className="grid grid-cols-1 lg:grid-cols-[2fr_3fr] items-start"
+        style={{
+          flex: 1,
+          maxWidth: '1200px',
+          margin: '0 auto',
+          width: '100%',
+          padding: 'clamp(40px, 5vw, 80px) clamp(20px, 4vw, 48px)',
+          gap: 'clamp(40px, 6vw, 80px)',
+        }}
+      >
+        {/* ── Left column — context ─────────────────────────────── */}
         <div>
-          <p className="text-[11px] font-medium tracking-[0.18em] uppercase text-warm-gray mb-[20px]">
-            03&nbsp;/&nbsp;DETAILS
+          <p
+            style={{
+              fontSize: '10px',
+              fontWeight: 500,
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              color: 'var(--color-warm-gray)',
+              marginBottom: '20px',
+            }}
+          >
+            Step 03 / 05
           </p>
+
           <h1
-            className="text-[clamp(32px,4vw,48px)] font-medium tracking-[-0.035em] leading-[1] text-ink-soft mb-[16px]"
+            style={{
+              fontSize: 'clamp(32px, 4vw, 44px)',
+              fontWeight: 500,
+              letterSpacing: '-0.035em',
+              lineHeight: 1,
+              color: 'var(--color-ink-soft)',
+              marginBottom: '16px',
+            }}
           >
             Where&rsquo;s the event?
           </h1>
-          <p className="text-[14px] text-warm-gray-soft leading-[1.6] max-w-[38ch]">
-            Just the essentials. We&rsquo;ll grab anything else we need in our pre-event call.
+
+          <p
+            style={{
+              fontSize: '14px',
+              color: 'var(--color-warm-gray-soft)',
+              lineHeight: 1.6,
+              maxWidth: '360px',
+            }}
+          >
+            Just the essentials. We&rsquo;ll grab anything else we need in our
+            pre-event call.
           </p>
         </div>
 
-        {/* Right column — placeholder */}
-        <div className="flex flex-col gap-[32px]">
-          <div
-            className="flex-1 min-h-[480px] rounded-[4px] bg-bone-warm flex items-center justify-center"
-            style={{ border: '0.5px solid var(--color-border-light)' }}
-          >
-            <p className="text-[11px] font-medium tracking-[0.18em] uppercase text-warm-gray opacity-60">
-              [Details form — built in Prompt 4]
-            </p>
-          </div>
+        {/* ── Right column — form + navigation ──────────────────── */}
+        <div>
+          <DetailsForm onValidityChange={setIsFormValid} />
 
-          <div className="flex items-center justify-between gap-[12px]">
-            <Button variant="secondary" surface="light" href="/book/package">
+          {/* Navigation */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: '32px',
+            }}
+          >
+            <Button
+              variant="secondary"
+              surface="light"
+              onClick={() => router.push('/book/package')}
+            >
               ← Back
             </Button>
-            <Button variant="primary" href="#" aria-disabled="true">
+
+            <Button
+              variant="primary"
+              disabled={!isFormValid}
+              onClick={() => router.push('/book/customize')}
+            >
               Continue →
             </Button>
           </div>
         </div>
-
       </div>
     </div>
   );
