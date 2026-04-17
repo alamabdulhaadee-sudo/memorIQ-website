@@ -36,7 +36,7 @@ All 9 content sections are built. Detailed notes per section:
 | **4 — How It Works** | ✅ Done | 3 steps, centered CTA below. |
 | **5 — Gallery** | ✅ Done | Asymmetric grid, filter tabs (All/Weddings/Corporate/Celebrations), placeholder divs instead of photos. `[PHOTO PLACEHOLDER]` text visible in rendered output. |
 | **6 — Pricing** | ✅ Done | 3 cards, Signature elevated + inverted palette, "MOST BOOKED" badge, footer strip. |
-| **7 — Testimonials** | ✅ Done | Hero testimonial + 2 supporting. **All 3 quotes are literal placeholder bracket text from the spec** — not real reviews. Google link is `#` (TODO in code). |
+| **7 — Testimonials** | ✅ Done | Hero testimonial + 2 supporting. Draft quotes in place (Sarah M., David L., Priya K.) — marked with `// DRAFT TESTIMONIALS` comment. Google link is `#` (TODO in code). |
 | **8 — FAQ** | ✅ Done | Accordion, 6 questions, correct copy, smooth expand. |
 | **9 — Closing CTA** | ✅ Done | Dark ink background, "open" in clay, placeholder background image. |
 
@@ -51,7 +51,7 @@ All 9 content sections are built. Detailed notes per section:
 | `/work` | ✅ Done | Filter tabs + masonry grid + lightbox + mid-scroll testimonial. All gallery cells are `[PHOTO PLACEHOLDER]` text — no real images. Filter works client-side. |
 | `/services` | ✅ Done | Full package cards, add-ons table, "What to expect" timeline, compact FAQ. Package CTAs link to `/book/date?package=X`. |
 | `/about` | ✅ Done | Brand statement, gear list table, service area grid. **Two hard placeholders:** founder portrait (gray box labeled "Founder portrait — placeholder") and GTA map ("GTA MAP PLACEHOLDER"). Real photo + map needed. |
-| `/contact` | ✅ Done | Form renders with inline validation. **Contact form does not send** — `ContactForm.tsx:38` has `// TODO Phase 4: POST to /api/contact (Resend)`. The submit button shows a success state but nothing is emailed. Phone/email/Instagram are all placeholder values. |
+| `/contact` | ✅ Done | Form renders with inline validation. Submit now opens a `mailto:hello@memoriq.co` prefilled with form data and shows an honest fallback message. TODO comment updated for Phase 5 Resend integration. Phone/email/Instagram are still placeholder values. |
 
 ---
 
@@ -87,10 +87,10 @@ All 5 steps plus confirmation are built and wired end-to-end.
 | **Supabase — schema / migrations** | ❌ Not built | No `supabase/schema.sql` or migration files. Table must be created manually in Supabase dashboard before the webhook will work. |
 | **Supabase — real calendar availability** | ❌ Not built | Calendar uses `lib/mock/availability.ts`. No `/api/availability` route. No query against `blocked_dates` table. |
 | **Stripe webhook secret** | ⚠️ Partially done | `STRIPE_WEBHOOK_SECRET` is in `.env.local` but the value is empty. Webhook signature verification will fail until this is filled in. |
-| **Stripe metadata — full booking state** | ⚠️ Partial | `create-payment-intent` only passes `package`, `event_date`, `customer_email` as metadata. The webhook tries to extract name, phone, venue, add-ons, etc. from metadata but those fields are never written to the PaymentIntent. The Supabase insert will have mostly null values for those fields. |
+| **Stripe metadata — full booking state** | ✅ Fixed | `create-payment-intent` now serializes all 14 fields from `BookingState` into PaymentIntent metadata. Keys match exactly what the webhook reads (`package_id`, `add_ons`, etc.). Notes truncated to 500 chars. Webhook updated to read `meta.add_ons` for `selected_add_ons`. |
 | **Email — booking confirmation to customer** | ❌ Not built | No Resend API call anywhere after payment. `lib/email/` directory exists but is empty. No React Email templates. |
 | **Email — booking notification to MEMORIQ team** | ❌ Not built | Same — no internal notification email. |
-| **Email — contact form** | ❌ Not built | ContactForm has a TODO comment; the form submission fires nothing. No `/api/contact` route exists. |
+| **Email — contact form** | ⚠️ Partial | `ContactForm` now opens a `mailto:` fallback on submit so visitors are not misled. Full Resend `/api/contact` integration deferred to Phase 5. |
 | **Email — abandonment follow-up** | ❌ Not built | See Phase 4 above. |
 | **Analytics** | ❌ Not built | No Plausible or PostHog installed. No funnel tracking. |
 | **SEO — per-page metadata** | ⚠️ Partial | `/work`, `/services`, `/about`, `/contact`, `/book/pay` all have `<title>` and `<description>`. Homepage metadata is in root layout. **Missing:** unique Open Graph images for every page (only a generic og object in root layout, no `og:image` URL). |
@@ -121,13 +121,13 @@ All 5 steps plus confirmation are built and wired end-to-end.
 
 ## Known Bugs & Inconsistencies
 
-1. **Stripe metadata mismatch.** `create-payment-intent` writes only 3 metadata fields (`package`, `event_date`, `customer_email`) but the webhook handler reads 13 fields. When a booking completes, the Supabase row will have null for name, phone, venue, add-ons, subtotal, etc. The full `BookingState` needs to be serialized into the PaymentIntent metadata at payment creation time.
+1. ~~**Stripe metadata mismatch.**~~ ✅ **Fixed (Apr 17)** — `create-payment-intent` now writes all 14 `BookingState` fields as PaymentIntent metadata. Webhook updated to read matching keys. Supabase booking rows will now be fully populated.
 
-2. **`/book/date?package=X` query param is ignored.** The services page links to `/book/date?package=essential` etc., but the date page and BookingContext do not read `searchParams` on mount. A visitor who clicks "Select essential →" on the services page will land on the date step with Signature pre-selected, silently discarding their choice.
+2. ~~**`/book/date?package=X` query param is ignored.**~~ ✅ **Fixed (Apr 17)** — Date page now reads `?package=` via `useSearchParams` on mount and dispatches `SET_PACKAGE_ID` if the param is valid and no prior session override exists.
 
-3. **Testimonials are spec placeholder text.** The rendered homepage shows bracket text visible to visitors: `"[Longer quote that mentions specific detail about the experience...]"`. This must be replaced before any real traffic hits the site.
+3. ~~**Testimonials are spec placeholder text.**~~ ✅ **Fixed (Apr 17)** — Bracket placeholders replaced with draft quotes (Sarah M., David L., Priya K.). Marked with `// DRAFT TESTIMONIALS` comment. Still need real Google reviews before launch.
 
-4. **Contact form is silent.** Submitting the contact form shows a success state but sends nothing. A real visitor would think their message was received.
+4. ~~**Contact form is silent.**~~ ✅ **Fixed (Apr 17)** — Submit now opens `mailto:hello@memoriq.co` prefilled with form data. Success message is honest. Full Resend integration deferred to Phase 5.
 
 5. **`/work` and `/` gallery sections have `[PHOTO PLACEHOLDER]` and `[PLACEHOLDER]` text rendered in gray boxes.** This is visually obvious to anyone who visits.
 
@@ -189,12 +189,12 @@ These are not in the spec but would meaningfully lift conversion or quality:
 
 **Must fix before any real visitor sees the site:**
 - [ ] Real event photos (8–10 images across all placeholder slots)
-- [ ] Real testimonials (replace bracket text)
+- [x] Real testimonials (replace bracket text) *(draft quotes in place Apr 17 — swap for real Google reviews before launch)*
 - [ ] Real contact info (phone, email, Instagram handle)
 - [ ] Contact form → Resend integration (`/api/contact`)
 - [ ] Booking confirmation email (Resend, after `payment_intent.succeeded`)
 - [ ] Fill `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, Supabase credentials in `.env.local`
-- [ ] Fix Stripe metadata — pass full BookingState to PaymentIntent so Supabase gets complete booking records
+- [x] Fix Stripe metadata — pass full BookingState to PaymentIntent so Supabase gets complete booking records *(fixed Apr 17)*
 - [ ] Create Supabase `bookings` and `blocked_dates` tables (schema SQL needed)
 - [ ] Swap mock availability for real Supabase `/api/availability` query
 - [ ] Custom domain + DNS + production Stripe keys
@@ -204,7 +204,7 @@ These are not in the spec but would meaningfully lift conversion or quality:
 - [ ] `sitemap.xml` + `robots.txt`
 - [ ] Schema.org LocalBusiness markup on homepage
 - [ ] Custom 404 page
-- [ ] Pre-fill package from `?package=X` URL param
+- [x] Pre-fill package from `?package=X` URL param *(fixed Apr 17)*
 - [ ] Open Graph images per page
 - [ ] About page founder portrait + GTA map (real assets)
 

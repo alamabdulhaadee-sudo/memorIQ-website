@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { useBooking } from '@/contexts/BookingContext';
 import { Calendar } from '@/components/booking/Calendar';
@@ -147,9 +147,22 @@ function ConfirmationBar({
 // Page
 // ---------------------------------------------------------------------------
 
+const VALID_PACKAGES = ['essential', 'signature', 'full_takeover'] as const;
+type ValidPackage = typeof VALID_PACKAGES[number];
+
 export default function DatePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { state, dispatch } = useBooking();
+
+  // Apply ?package= URL param on first mount if context still holds the default
+  useEffect(() => {
+    const param = searchParams.get('package') as ValidPackage | null;
+    if (param && (VALID_PACKAGES as readonly string[]).includes(param) && state.packageId === 'signature') {
+      dispatch({ type: 'SET_PACKAGE_ID', payload: param });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Determine initial month: use pre-selected date from context (back-nav),
   // or default to today's month.

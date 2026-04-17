@@ -237,9 +237,20 @@ export default function PayPageClient() {
         body: JSON.stringify({
           depositAmount:  10000,
           bookingDetails: {
-            packageId:     state.packageId,
-            eventDate:     state.eventDate,
-            customerEmail: state.customerEmail,
+            packageId:      state.packageId,
+            eventDate:      state.eventDate,
+            customerName:   state.customerName,
+            customerEmail:  state.customerEmail,
+            customerPhone:  state.customerPhone,
+            eventType:      state.eventType,
+            venueName:      state.venueName,
+            venueAddress:   state.venueAddress,
+            guestCount:     state.guestCount,
+            notes:          state.notes,
+            templateChoice: state.templateChoice,
+            backdropChoice: state.backdropChoice,
+            selectedAddOns: state.selectedAddOns,
+            subtotal:       state.subtotal,
           },
         }),
       });

@@ -35,8 +35,26 @@ export function ContactForm() {
     setErrors({});
     setState("submitting");
 
-    // TODO Phase 4: POST to /api/contact (Resend)
-    await new Promise((r) => setTimeout(r, 900));
+    // TODO Phase 5: Replace mailto with Resend API call to /api/contact
+    const name      = (data.get("name")      as string).trim();
+    const email     = (data.get("email")     as string).trim();
+    const eventDate = (data.get("eventDate") as string).trim();
+    const message   = (data.get("message")   as string).trim();
+
+    const subject = encodeURIComponent(`Enquiry from ${name}`);
+    const body = encodeURIComponent(
+      [
+        `Name: ${name}`,
+        `Email: ${email}`,
+        eventDate ? `Event date: ${eventDate}` : '',
+        '',
+        message,
+      ]
+        .filter(Boolean)
+        .join('\n')
+    );
+
+    window.location.href = `mailto:hello@memoriq.co?subject=${subject}&body=${body}`;
     setState("success");
   }
 
@@ -44,10 +62,14 @@ export function ContactForm() {
     return (
       <div className="py-[40px]">
         <p className="text-[clamp(20px,2vw,26px)] font-medium text-ink-soft tracking-[-0.02em] mb-[12px]">
-          Message sent.
+          Almost there.
         </p>
         <p className="text-[14px] text-warm-gray-soft leading-[1.55]">
-          We reply within 4 hours. Check your inbox — and spam, just in case.
+          Your email client should open now. If it doesn&rsquo;t, email us directly at{' '}
+          <a href="mailto:hello@memoriq.co" className="text-ink-soft underline underline-offset-2">
+            hello@memoriq.co
+          </a>
+          .
         </p>
       </div>
     );

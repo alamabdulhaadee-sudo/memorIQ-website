@@ -49,8 +49,8 @@ export async function POST(request: Request): Promise<Response> {
             notes:          meta.notes          ?? null,
             template_choice: meta.template_choice ?? null,
             backdrop_choice: meta.backdrop_choice ?? null,
-            selected_add_ons: meta.selected_add_ons
-              ? JSON.parse(meta.selected_add_ons)
+            selected_add_ons: meta.add_ons
+              ? JSON.parse(meta.add_ons)
               : [],
             subtotal:        meta.subtotal       ? Number(meta.subtotal)      : null,
             deposit_amount:  intent.amount,

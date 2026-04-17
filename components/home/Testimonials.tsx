@@ -9,10 +9,11 @@ interface Testimonial {
   hero: boolean;
 }
 
+// DRAFT TESTIMONIALS — replace with real Google reviews before launch
 const TESTIMONIALS: Testimonial[] = [
   {
     quote:
-      "[Longer quote that mentions specific detail about the experience — guest reaction, print quality, attendant's professionalism. 2–3 sentences.]",
+      "Our guests literally would not leave the booth. The print quality was unreal — everyone took their strips home and half of them posted to Instagram that night. Best vendor decision we made.",
     name: "Sarah M.",
     eventType: "Wedding",
     stars: 5,
@@ -20,16 +21,17 @@ const TESTIMONIALS: Testimonial[] = [
   },
   {
     quote:
-      "[Shorter quote, ideally from a corporate client mentioning the branded overlay or QR sharing.]",
-    name: "Mark R.",
+      "MEMORIQ handled our product launch activation for 300 guests without a single hiccup. The branded overlay matched our deck perfectly and the QR sharing meant we had UGC within minutes.",
+    name: "David L.",
     eventType: "Corporate Event",
     stars: 5,
     hero: false,
   },
   {
-    quote: "[Shorter quote from a birthday or celebration client.]",
+    quote:
+      "My mom framed her photo strip. That tells you everything. The setup looked like it belonged at the venue and the attendant was amazing with the kids.",
     name: "Priya K.",
-    eventType: "Birthday",
+    eventType: "30th Birthday",
     stars: 5,
     hero: false,
   },
