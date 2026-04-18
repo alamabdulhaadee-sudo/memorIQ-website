@@ -35,41 +35,51 @@ export function ContactForm() {
     setErrors({});
     setState("submitting");
 
-    // TODO Phase 5: Replace mailto with Resend API call to /api/contact
     const name      = (data.get("name")      as string).trim();
     const email     = (data.get("email")     as string).trim();
     const eventDate = (data.get("eventDate") as string).trim();
     const message   = (data.get("message")   as string).trim();
 
-    const subject = encodeURIComponent(`Enquiry from ${name}`);
-    const body = encodeURIComponent(
-      [
-        `Name: ${name}`,
-        `Email: ${email}`,
-        eventDate ? `Event date: ${eventDate}` : '',
-        '',
-        message,
-      ]
-        .filter(Boolean)
-        .join('\n')
-    );
+    try {
+      const res = await fetch('/api/contact', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ name, email, eventDate: eventDate || undefined, message }),
+      });
 
-    window.location.href = `mailto:hello@memoriq.co?subject=${subject}&body=${body}`;
-    setState("success");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setState("success");
+    } catch (err) {
+      console.error('[ContactForm] submit failed:', err);
+      setState("error");
+    }
   }
 
   if (state === "success") {
     return (
       <div className="py-[40px]">
         <p className="text-[clamp(20px,2vw,26px)] font-medium text-ink-soft tracking-[-0.02em] mb-[12px]">
-          Almost there.
+          Message sent.
         </p>
         <p className="text-[14px] text-warm-gray-soft leading-[1.55]">
-          Your email client should open now. If it doesn&rsquo;t, email us directly at{' '}
-          <a href="mailto:hello@memoriq.co" className="text-ink-soft underline underline-offset-2">
+          We&rsquo;ll reply within 4 hours.
+        </p>
+      </div>
+    );
+  }
+
+  if (state === "error") {
+    return (
+      <div className="py-[40px]">
+        <p className="text-[clamp(20px,2vw,26px)] font-medium text-ink-soft tracking-[-0.02em] mb-[12px]">
+          Something went wrong.
+        </p>
+        <p className="text-[14px] text-warm-gray-soft leading-[1.55]">
+          Email us directly at{' '}
+          <a href="mailto:hello@memoriq.co" className="text-clay underline underline-offset-2">
             hello@memoriq.co
           </a>
-          .
+          {' '}and we&rsquo;ll get back to you within 4 hours.
         </p>
       </div>
     );
