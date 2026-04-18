@@ -6,10 +6,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useBooking } from '@/contexts/BookingContext';
 import { Calendar } from '@/components/booking/Calendar';
 import { Button } from '@/components/ui/Button';
-import {
-  getMonthAvailability,
-  type MonthAvailability,
-} from '@/lib/mock/availability';
+import type { MonthAvailability } from '@/lib/mock/availability';
+import type { AvailabilityDate } from '@/app/api/availability/route';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -174,13 +172,54 @@ export default function DatePage() {
 
   const [displayYear,  setDisplayYear]  = useState(() => getInitialMonth().year);
   const [displayMonth, setDisplayMonth] = useState(() => getInitialMonth().month);
-  const [availability, setAvailability] = useState<MonthAvailability>(() =>
-    getMonthAvailability(getInitialMonth().year, getInitialMonth().month),
-  );
+  const [availability, setAvailability] = useState<MonthAvailability>({});
+  const [availLoading, setAvailLoading] = useState(true);
+  const [availError,   setAvailError]   = useState(false);
 
-  // Re-fetch availability when displayed month changes
+  // Fetch real availability from /api/availability when the displayed month changes.
+  // month + 1 because the API uses 1-indexed months; JS Date uses 0-indexed.
   useEffect(() => {
-    setAvailability(getMonthAvailability(displayYear, displayMonth));
+    let cancelled = false;
+    setAvailLoading(true);
+    setAvailError(false);
+
+    fetch(`/api/availability?year=${displayYear}&month=${displayMonth + 1}`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json() as Promise<{ dates: AvailabilityDate[] }>;
+      })
+      .then(({ dates }) => {
+        if (cancelled) return;
+        // Build MonthAvailability map: all dates default to 'available',
+        // then overlay whatever the API returned as blocked/limited.
+        const map: MonthAvailability = {};
+        const daysInMonth = new Date(displayYear, displayMonth + 1, 0).getDate();
+        for (let d = 1; d <= daysInMonth; d++) {
+          const iso = `${displayYear}-${String(displayMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          map[iso] = 'available';
+        }
+        for (const { date, status } of dates) {
+          map[date] = status;
+        }
+        setAvailability(map);
+        setAvailLoading(false);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error('[DatePage] availability fetch failed:', err);
+        setAvailError(true);
+        setAvailLoading(false);
+        // Treat all dates as available so the flow isn't blocked
+        const map: MonthAvailability = {};
+        const daysInMonth = new Date(displayYear, displayMonth + 1, 0).getDate();
+        for (let d = 1; d <= daysInMonth; d++) {
+          const iso = `${displayYear}-${String(displayMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          map[iso] = 'available';
+        }
+        setAvailability(map);
+      });
+
+    return () => { cancelled = true; };
   }, [displayYear, displayMonth]);
 
   function handleMonthChange(year: number, month: number) {
@@ -287,6 +326,62 @@ export default function DatePage() {
 
         {/* ── Right column — calendar ───────────────────────────── */}
         <div>
+          {/* Availability error notice */}
+          {availError && (
+            <div
+              style={{
+                marginBottom: '16px',
+                padding: '12px 16px',
+                background: 'rgba(198,93,63,0.08)',
+                borderLeft: '2px solid var(--color-clay)',
+                borderRadius: '0 4px 4px 0',
+                fontSize: '13px',
+                color: 'var(--color-warm-gray-soft)',
+                lineHeight: 1.5,
+              }}
+            >
+              Live availability couldn&rsquo;t load — please{' '}
+              <a
+                href="/contact"
+                style={{ color: 'var(--color-clay)', textDecoration: 'underline' }}
+              >
+                contact us
+              </a>{' '}
+              to confirm your date before booking.
+            </div>
+          )}
+
+          {/* Loading skeleton — subtle opacity pulse on the calendar area */}
+          <div style={{ position: 'relative' }}>
+            {availLoading && (
+              <div
+                aria-label="Loading availability…"
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  zIndex: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'rgba(10,8,6,0.35)',
+                  borderRadius: '6px',
+                }}
+              >
+                <span
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    border: '2px solid rgba(244,241,234,0.2)',
+                    borderTopColor: 'var(--color-clay)',
+                    borderRadius: '50%',
+                    display: 'inline-block',
+                    animation: 'spin 0.8s linear infinite',
+                  }}
+                />
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+              </div>
+            )}
+
           <Calendar
             year={displayYear}
             month={displayMonth}
@@ -295,6 +390,7 @@ export default function DatePage() {
             onDateSelect={handleDateSelect}
             onMonthChange={handleMonthChange}
           />
+          </div>
 
           {/* Confirmation bar — slides in when a date is selected */}
           {state.eventDate && (
