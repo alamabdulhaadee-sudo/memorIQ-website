@@ -184,6 +184,13 @@ export function DetailsForm({ onValidityChange }: DetailsFormProps) {
   // Focus-border toggle state per field
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
+  // Local display value for the phone input — formatted for the user to read,
+  // while the raw 10-digit string is what we store in BookingContext.
+  // Initialise from context in case the user is navigating back.
+  const [phoneDisplay, setPhoneDisplay] = useState<string>(() =>
+    formatPhone(state.customerPhone),
+  );
+
   const errors = getErrors(state);
   const isFormValid = Object.values(errors).every((e) => e === null);
 
@@ -269,14 +276,17 @@ export function DetailsForm({ onValidityChange }: DetailsFormProps) {
         <input
           type="tel"
           autoComplete="tel"
-          value={state.customerPhone}
+          value={phoneDisplay}
           placeholder="(416) 555-0100"
           style={inputStyle('customerPhone')}
           onFocus={() => setFocusedField('customerPhone')}
           onBlur={() => { setFocusedField(null); touch('customerPhone'); }}
-          onChange={(e) =>
-            dispatch({ type: 'SET_CUSTOMER_PHONE', payload: formatPhone(e.target.value) })
-          }
+          onChange={(e) => {
+            // Extract raw digits only (max 10), store in context; show formatted in input
+            const raw = e.target.value.replace(/\D/g, '').slice(0, 10);
+            setPhoneDisplay(formatPhone(raw));
+            dispatch({ type: 'SET_CUSTOMER_PHONE', payload: raw });
+          }}
         />
       </FormField>
 

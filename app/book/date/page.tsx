@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { useBooking } from '@/contexts/BookingContext';
 import { Calendar } from '@/components/booking/Calendar';
+import { HoldTimer } from '@/components/booking/HoldTimer';
 import { Button } from '@/components/ui/Button';
 import type { MonthAvailability } from '@/lib/mock/availability';
 import type { AvailabilityDate } from '@/app/api/availability/route';
@@ -108,16 +109,16 @@ function ConfirmationBar({
         padding: '16px 20px',
         marginTop: '16px',
         gap: '16px',
+        flexWrap: 'wrap',
       }}
     >
-      <div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
         <p
           style={{
             fontSize: '11px',
             fontWeight: 500,
             letterSpacing: '0.15em',
             color: 'rgba(244,241,234,0.5)',
-            marginBottom: '4px',
             textTransform: 'uppercase',
           }}
         >
@@ -132,6 +133,7 @@ function ConfirmationBar({
         >
           {formatDisplayDate(isoDate)}
         </p>
+        <HoldTimer isoDate={isoDate} />
       </div>
 
       <Button variant="primary" onClick={onContinue}>
@@ -162,11 +164,18 @@ export default function DatePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Determine initial month: use pre-selected date from context (back-nav),
-  // or default to today's month.
+  // Determine initial month:
+  // 1. If context already has a date (back-navigation), use that date's month.
+  // 2. If today is past the 20th, default to next month (most people aren't
+  //    booking within the next 10 days).
+  // 3. Otherwise default to current month.
   function getInitialMonth(): { year: number; month: number } {
     if (state.eventDate) return parseISOMonth(state.eventDate);
     const now = new Date();
+    if (now.getDate() > 20) {
+      const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      return { year: next.getFullYear(), month: next.getMonth() };
+    }
     return { year: now.getFullYear(), month: now.getMonth() };
   }
 

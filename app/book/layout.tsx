@@ -134,7 +134,10 @@ function CloseButton() {
       onClick={handleClose}
       className={[
         'flex-shrink-0 text-[12px] font-medium text-warm-gray hover:text-ink-soft',
-        'transition-colors duration-150 leading-none bg-transparent border-0 cursor-pointer p-0',
+        'transition-colors duration-150 leading-none bg-transparent border-0 cursor-pointer',
+        // 44×44 minimum tap target — padding makes the hit area large while
+        // keeping the text visually small (negative margin compensates for layout)
+        'min-w-[44px] min-h-[44px] flex items-center justify-end',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay/50 rounded',
       ].join(' ')}
       aria-label="Close booking and return to homepage"
