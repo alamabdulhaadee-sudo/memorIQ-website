@@ -3,10 +3,23 @@ import { Container } from "@/components/ui/Container";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { WorkGallery } from "@/components/work/WorkGallery";
 
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://memoriq.ca";
+
 export const metadata: Metadata = {
   title: "Work — MEMORIQ Photo Booth Toronto",
   description:
     "Portfolio of MEMORIQ photo booth events across the Greater Toronto Area — weddings, corporate activations, and celebrations. Real events, no stock photos.",
+  openGraph: {
+    title: "Work — MEMORIQ Photo Booth Toronto",
+    description:
+      "Portfolio of MEMORIQ photo booth events across the Greater Toronto Area — weddings, corporate activations, and celebrations. Real events, no stock photos.",
+    type: "website",
+    url: `${BASE_URL}/work`,
+    siteName: "MEMORIQ",
+    locale: "en_CA",
+    // TODO: Replace with a unique OG image (1200×630) for the work page before launch
+    images: [{ url: `${BASE_URL}/og-default.jpg`, width: 1200, height: 630 }],
+  },
 };
 
 export default function WorkPage() {

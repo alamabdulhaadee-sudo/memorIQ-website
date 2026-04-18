@@ -1,12 +1,65 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Container } from "@/components/ui/Container";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Button } from "@/components/ui/Button";
+
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://memoriq.ca";
 
 export const metadata: Metadata = {
   title: "Services & Pricing — MEMORIQ Photo Booth Toronto",
   description:
     "Detailed packages, add-ons, and pricing for MEMORIQ photo booth rentals across the Greater Toronto Area. Three tiers, transparent pricing, no quote-gated nonsense.",
+  openGraph: {
+    title: "Services & Pricing — MEMORIQ Photo Booth Toronto",
+    description:
+      "Detailed packages, add-ons, and pricing for MEMORIQ photo booth rentals across the Greater Toronto Area. Three tiers, transparent pricing, no quote-gated nonsense.",
+    type: "website",
+    url: `${BASE_URL}/services`,
+    siteName: "MEMORIQ",
+    locale: "en_CA",
+    // TODO: Replace with a unique OG image (1200×630) for the services page before launch
+    images: [{ url: `${BASE_URL}/og-default.jpg`, width: 1200, height: 630 }],
+  },
+};
+
+// Schema.org Service structured data
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  name: "Photo Booth Rental",
+  provider: {
+    "@type": "LocalBusiness",
+    name: "MEMORIQ Photo Booth",
+    url: BASE_URL,
+  },
+  areaServed: {
+    "@type": "AdministrativeArea",
+    name: "Greater Toronto Area",
+  },
+  offers: [
+    {
+      "@type": "Offer",
+      name: "Essential",
+      description: "2 hours · DSLR booth, studio lighting, unlimited prints, dedicated attendant.",
+      price: "400",
+      priceCurrency: "CAD",
+    },
+    {
+      "@type": "Offer",
+      name: "Signature",
+      description: "3 hours · Custom template, premium backdrop, digital gallery, GIF + boomerang.",
+      price: "550",
+      priceCurrency: "CAD",
+    },
+    {
+      "@type": "Offer",
+      name: "Full Takeover",
+      description: "4 hours · Premium props, guest book, priority weekend slots.",
+      price: "700",
+      priceCurrency: "CAD",
+    },
+  ],
 };
 
 // ---------------------------------------------------------------------------
@@ -224,6 +277,11 @@ function AccordionItem({ q, a }: { q: string; a: string }) {
 export default function ServicesPage() {
   return (
     <>
+      <Script
+        id="schema-service"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+      />
       {/* ── Header ── */}
       <section className="bg-bone py-[80px] lg:py-[96px]">
         <Container>

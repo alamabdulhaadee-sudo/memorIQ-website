@@ -3,10 +3,23 @@ import { Container } from "@/components/ui/Container";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Button } from "@/components/ui/Button";
 
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://memoriq.ca";
+
 export const metadata: Metadata = {
   title: "About — MEMORIQ Photo Booth Toronto",
   description:
     "MEMORIQ is a premium photo booth company based in Toronto, serving weddings, corporate events, and celebrations across the Greater Toronto Area.",
+  openGraph: {
+    title: "About — MEMORIQ Photo Booth Toronto",
+    description:
+      "MEMORIQ is a premium photo booth company based in Toronto, serving weddings, corporate events, and celebrations across the Greater Toronto Area.",
+    type: "website",
+    url: `${BASE_URL}/about`,
+    siteName: "MEMORIQ",
+    locale: "en_CA",
+    // TODO: Replace with a unique OG image (1200×630) for the about page before launch
+    images: [{ url: `${BASE_URL}/og-default.jpg`, width: 1200, height: 630 }],
+  },
 };
 
 // ---------------------------------------------------------------------------

@@ -4,10 +4,23 @@ import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Button } from "@/components/ui/Button";
 import { ContactForm } from "@/components/contact/ContactForm";
 
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://memoriq.ca";
+
 export const metadata: Metadata = {
   title: "Contact — MEMORIQ Photo Booth Toronto",
   description:
     "Questions about booking? Contact MEMORIQ Photo Booth. We serve the Greater Toronto Area and reply within 4 hours.",
+  openGraph: {
+    title: "Contact — MEMORIQ Photo Booth Toronto",
+    description:
+      "Questions about booking? Contact MEMORIQ Photo Booth. We serve the Greater Toronto Area and reply within 4 hours.",
+    type: "website",
+    url: `${BASE_URL}/contact`,
+    siteName: "MEMORIQ",
+    locale: "en_CA",
+    // TODO: Replace with a unique OG image (1200×630) for the contact page before launch
+    images: [{ url: `${BASE_URL}/og-default.jpg`, width: 1200, height: 630 }],
+  },
 };
 
 export default function ContactPage() {
